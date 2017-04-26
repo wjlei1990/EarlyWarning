@@ -1,3 +1,6 @@
+"""
+Doc: Warning
+"""
 import obspy
 
 
