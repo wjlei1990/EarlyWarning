@@ -3,12 +3,10 @@ Created on Wed Apr 26 14:36:27 2017
 
 @author: Yajun Peng, Wenjie Lei
 """
-
-import obspy
-from obspy import UTCDateTime
 from obspy.signal.trigger import trigger_onset
 import matplotlib.pyplot as plt
 from obspy.signal.trigger import plot_trigger, recursive_sta_lta
+from proc_utils import highpass_filter_waveform
 
 
 plt.style.use('seaborn-darkgrid')
@@ -28,12 +26,12 @@ def extract_arrival_index(arrival):
 def plot_stream_and_arrival(st, picks, origin_time, predict_arrivals):
     print("--------> Plot...")
     print(origin_time)
-    fig = plt.figure(figsize=(10, 15))
+    plt.figure(figsize=(10, 15))
     ntraces = len(st)
     for idx, tr in enumerate(st):
         ax = plt.subplot(ntraces, 1, idx+1)
         ax.axis('off')
-        #ax.get_xaxis().set_visible(False)
+        # ax.get_xaxis().set_visible(False)
         plt.plot(tr.data)
         arrival_index, pick_type = extract_arrival_index(picks[tr.id])
         ymin, ymax = ax.get_ylim()
@@ -41,24 +39,14 @@ def plot_stream_and_arrival(st, picks, origin_time, predict_arrivals):
         plt.vlines([event_index], ymin, ymax, linestyles="dotted",
                    color='g', linewidth=2)
         pred_arrival_index = \
-                event_index + predict_arrivals[idx] / tr.stats.delta
+            event_index + predict_arrivals[idx] / tr.stats.delta
         plt.vlines([pred_arrival_index], ymin, ymax, linestyles="dashdot",
                    color='k', linewidth=3)
         if pick_type is not None:
             plt.vlines([arrival_index], ymin, ymax, color='r', linewidth=2)
 
-
     plt.tight_layout()
     plt.show()
-
-
-def highpass_filter_waveform(trace, freq):
-    trace.detrend('linear')
-    trace.taper(0.05)
-    trace.filter('highpass', freq=freq, corners=4, zerophase=False)
-
-    # trace.detrend('linear')
-    # trace.taper(0.1)
 
 
 def check_arrival_time(arrivals, waveform_start_time,
@@ -94,12 +82,12 @@ def pick_arrival(trace, nsta_seconds, nlta_seconds, df,
     return P_pick
 
 
-def p_wave_onset_and_SNR(
-    trace, origin_time, pre_filter=False, pre_filter_freq=0.75,
-    pick_filter=True, pick_filter_freq=1.0,
-    tigger_threshold=100, SNR_threshold=100,
-    nsta_seconds=0.05, nlta_seconds=20,
-    SNR_plot_flag=False, trigger_plot_flag=False):
+def p_wave_onset_and_SNR(trace, origin_time, pre_filter=False,
+                         pre_filter_freq=0.75,
+                         pick_filter=True, pick_filter_freq=1.0,
+                         tigger_threshold=100, SNR_threshold=100,
+                         nsta_seconds=0.05, nlta_seconds=20,
+                         SNR_plot_flag=False, trigger_plot_flag=False):
     """
     Pick P wave (seimic wave that arrives first) onset time
     from the vertical component using a recursive STA/LTA
