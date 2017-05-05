@@ -1,5 +1,5 @@
 import os
-import sys
+import sys  # NOQA
 import json
 import pandas as pd
 import obspy
@@ -27,12 +27,11 @@ def filter_stream_on_distance(st, stations):
             continue
         for tr in _st:
             idx_trace += 1
-            #print("%d - [%s] -- %.5f" % (idx_trace, tr.id, _dist))
+            # print("%d - [%s] -- %.5f" % (idx_trace, tr.id, _dist))
             st_new.append(tr)
             dists.append(_dist)
 
     return st_new, dists
-
 
 
 def filter_and_pick_arrival_on_stream(src, stations, st, dist_threshold=1.5,
@@ -69,7 +68,7 @@ def filter_and_pick_arrival_on_stream(src, stations, st, dist_threshold=1.5,
         arr = arrivals[idx]
         arr = UTCDateTime(src.time) + arr
         time_diff = pick["time"] - arr
-        #print("%d -- [%s]Time difference: %s"
+        # print("%d -- [%s]Time difference: %s"
         #      % (idx + 1, tr.id, pick["time"] - arr))
         if abs(time_diff) > traveltime_threshold:
             continue
@@ -98,8 +97,8 @@ def main():
         src = sources.loc[idx]
         origin_time = obspy.UTCDateTime(src.time)
         print("=" * 5 + " [%d/%d]Source(%s, mag=%.2f, dep=%.2f km) "
-              % (idx + 1, nsources, origin_time, src.mag, src.depth)
-              + "=" * 5)
+              % (idx + 1, nsources, origin_time, src.mag, src.depth) +
+              "=" * 5)
         datafile = os.path.join(database, "%s" % origin_time, "CI.mseed")
         if not os.path.exists(datafile):
             continue

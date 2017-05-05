@@ -2,7 +2,7 @@ import numpy as np
 from proc_utils import highpass_filter_waveform, lowpass_filter_waveform
 
 
-def cut_P_wave(trace, starttime, win_length):
+def cut_window(trace, starttime, win_length):
     """
     Cut out the first win_length seconds of P wave
     (Careful: for stations close to the event, S wave
@@ -54,7 +54,8 @@ def make_disp_vel_acc_records(trace):
     return {"acc": trace_acc, "vel": trace_vel, "disp": trace_disp}
 
 
-def tau_p_max(trace, df, time_padded_before, lowpass_for_tau_p=True):
+def tau_p_max(trace, time_padded_before=0, lowpass_for_tau_p=True,
+              lowpass_freq=3.0):
     """
     tau_p_i = 2 * pi * sqrt(X_i/D_i)
     X_i = alpha * X_(i-1) + x_i^2
@@ -63,11 +64,15 @@ def tau_p_max(trace, df, time_padded_before, lowpass_for_tau_p=True):
     Olson and Allen (2005) used 3 Hz lowpass filter.
     Previous studies show that this measurement seems to be not very robust.
     """
+    df = trace.stats.sampling_rate
     trace_len = len(trace)
     if lowpass_for_tau_p:
-        lowpass_filter_waveform(trace, 3)
+        lowpass_filter_waveform(trace, lowpass_freq)
 
-    trace_acc, trace_vel, _ = make_disp_vel_acc_records(trace)
+    _trace_types = make_disp_vel_acc_records(trace)
+    trace_vel = _trace_types["vel"]
+    trace_acc = _trace_types["acc"]
+
     alpha = 1 - 1 / df
     tau_p = np.zeros(trace_len, )
     X_i = np.zeros(trace_len)
@@ -88,17 +93,13 @@ def tau_p_max(trace, df, time_padded_before, lowpass_for_tau_p=True):
     return {"tau_p_max": tau_p_max, "tau_p": tau_p}
 
 
-def tau_c_and_peak_amplitude(trace):
+def tau_c(trace_disp, trace_vel):
     """
     tau_c is a period parameter. If the waveform is monochromatic,
     this is essentially the period.
     Pd, Pv, Pa are the peak amplitude of displacement, velcoity,
     acceleration within the first a few seconds.
     """
-    trace_acc, trace_vel, trace_disp = make_disp_vel_acc_records(trace)
     tau_c = 2 * np.pi * np.sqrt(
         np.sum(trace_disp.data ** 2) / np.sum(trace_vel.data ** 2))
-    P_d = max(trace_disp)
-    P_v = max(trace_vel)
-    P_a = max(trace_acc)
-    return {"tau_c": tau_c, "P_d": P_d, "P_v": P_v, "P_a": P_a}
+    return tau_c
