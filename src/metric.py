@@ -93,7 +93,7 @@ def tau_p_max(trace, time_padded_before=0, lowpass_for_tau_p=True,
     return {"tau_p_max": tau_p_max, "tau_p": tau_p}
 
 
-def tau_c(trace_disp, trace_vel):
+def tau_c(disp, vel):
     """
     tau_c is a period parameter. If the waveform is monochromatic,
     this is essentially the period.
@@ -101,5 +101,5 @@ def tau_c(trace_disp, trace_vel):
     acceleration within the first a few seconds.
     """
     tau_c = 2 * np.pi * np.sqrt(
-        np.sum(trace_disp.data ** 2) / np.sum(trace_vel.data ** 2))
+        np.sum(disp ** 2) / np.sum(vel ** 2))
     return tau_c

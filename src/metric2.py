@@ -10,13 +10,25 @@ def envelope(data):
     return obspy.signal.filter.envelope(data)
 
 
-def split_data(data, n=3):
+def split_data(data, n=6):
     npts = len(data)
     npts_split = int(npts / n)
 
     data_split = []
     for i in range(n):
         _d = data[i*npts_split: (i+1)*npts_split]
+        data_split.append(_d)
+
+    return data_split
+
+
+def split_accumul_data(data, n=6):
+    npts = len(data)
+    npts_split = int(npts / n)
+
+    data_split = []
+    for i in range(n):
+        _d = data[0: (i+1)*npts_split]
         data_split.append(_d)
 
     return data_split
