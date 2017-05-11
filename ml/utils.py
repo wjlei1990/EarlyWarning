@@ -1,6 +1,7 @@
 from __future__ import print_function, division
 import pandas as pd
 import numpy as np
+import json
 import math
 import operator
 from sklearn import preprocessing
@@ -10,6 +11,16 @@ INT_COL_DTYPE = np.int16
 FLOAT_COL_DTYPE = np.float
 CODE_RESERVE = set([-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -14])
 SEP = "|+|"
+
+
+def load_json(fn):
+    with open(fn) as fh:
+        return json.load(fn)
+
+
+def dump_json(content, fn):
+    with open(fn, 'w') as fh:
+        json.dump(content, fh, indent=2, sort_keys=True)
 
 
 def load_csv(fn):

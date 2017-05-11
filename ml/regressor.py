@@ -2,10 +2,7 @@ from __future__ import print_function
 import time
 import numpy as np
 from sklearn import linear_model
-import matplotlib.pyplot as plt
 from utils import standarize_feature, print_title
-from utils import print_title
-#from io_utils import plot_y_hist
 
 
 def train_ridge_linear_model(_train_x, train_y, _predict_x,
@@ -35,8 +32,11 @@ def train_ridge_linear_model(_train_x, train_y, _predict_x,
     return {"y": predict_y, "train_y": train_y_pred, "coef": reg.coef_}
 
 
-def train_lasso_model(train_x, train_y, predict_x):
+def train_lasso_model(_train_x, train_y, _predict_x):
     print_title("Lasso Regressor")
+
+    train_x, predict_x = \
+        standarize_feature(_train_x, _predict_x)
 
     reg = linear_model.LassoCV(
         precompute=True, cv=5, verbose=1, n_jobs=4)
@@ -44,7 +44,7 @@ def train_lasso_model(train_x, train_y, predict_x):
     print("alphas: %s" % reg.alphas_)
     print("mse path: %s" % np.mean(reg.mse_path_, axis=1))
 
-    itemindex = np.where(reg.alphas_==reg.alpha_)
+    itemindex = np.where(reg.alphas_ == reg.alpha_)
     print("itemindex: %s" % itemindex)
     _mse = np.mean(reg.mse_path_[itemindex[0], :])
     print("Best alpha using bulit-in LassoCV: %f(mse: %f)" %
@@ -88,14 +88,15 @@ def train_lassolars_model(train_x, train_y, predict_x):
     return {'y': predict_y, "coef": reg.coef_}
 
 
-def train_EN_model(train_x, train_y, predict_x):
+def train_EN_model(_train_x, train_y, _predict_x):
     print_title("ElasticNet")
+    train_x, predict_x = \
+        standarize_feature(_train_x, _predict_x)
 
     #l1_ratios = [1e-4, 1e-3, 1e-2, 1e-1]
     #l1_ratios = [1e-5, 1e-4, 1e-3]
-    #l1_ratios = [1e-2, 1e-1, 0.2, 0.3, 0.4, 0.5,
-    #             0.6, 0.7, 0.8, 0.9]
-    l1_ratios = [0.5]
+    l1_ratios = [0.9, 0.92, 0.95, 0.97, 0.99]
+    #l1_ratios = [0.5]
     min_mse = 1
     for r in l1_ratios:
         t1 = time.time()
